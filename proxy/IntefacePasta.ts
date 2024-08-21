@@ -1,0 +1,3 @@
+interface InterfaceAcessoPasta {
+  acessarPasta() : void;
+}
