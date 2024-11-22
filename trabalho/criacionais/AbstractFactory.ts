@@ -1,69 +1,67 @@
-interface Button {
-    render(): void;
+interface ProductFactory {
+    createProduct(): Product;
+    createShipping(): Shipping;
 }
 
-interface Checkbox {
-    render(): void;
+interface Product {
+    getDetails(): string;
 }
 
-class WindowsButton implements Button {
-    render() {
-        console.log("Botão Windows renderizado.");
+interface Shipping {
+    calculateCost(): number;
+}
+
+class ElectronicsFactory implements ProductFactory {
+    createProduct(): Product {
+        return new Electronic();
+    }
+
+    createShipping(): Shipping {
+        return new ElectronicsShipping();
     }
 }
 
-class WindowsCheckbox implements Checkbox {
-    render() {
-        console.log("Checkbox Windows renderizado.");
+class FurnitureFactory implements ProductFactory {
+    createProduct(): Product {
+        return new Furniture();
+    }
+
+    createShipping(): Shipping {
+        return new FurnitureShipping();
     }
 }
 
-class MacOSButton implements Button {
-    render() {
-        console.log("Botão macOS renderizado.");
+class Electronic implements Product {
+    getDetails(): string {
+        return "Electronic: Smartphone";
     }
 }
 
-class MacOSCheckbox implements Checkbox {
-    render() {
-        console.log("Checkbox macOS renderizado.");
+class Furniture implements Product {
+    getDetails(): string {
+        return "Furniture: Sofa";
     }
 }
 
-interface GUIFactory {
-    createButton(): Button;
-    createCheckbox(): Checkbox;
-}
-
-class WindowsFactory implements GUIFactory {
-    createButton(): Button {
-        return new WindowsButton();
-    }
-    createCheckbox(): Checkbox {
-        return new WindowsCheckbox();
+class ElectronicsShipping implements Shipping {
+    calculateCost(): number {
+        return 15;
     }
 }
 
-class MacOSFactory implements GUIFactory {
-    createButton(): Button {
-        return new MacOSButton();
-    }
-    createCheckbox(): Checkbox {
-        return new MacOSCheckbox();
+class FurnitureShipping implements Shipping {
+    calculateCost(): number {
+        return 50;
     }
 }
 
-class Application {
-    constructor(private factory: GUIFactory) {}
+function createOrder(factory: ProductFactory): void {
+    const product = factory.createProduct();
+    const shipping = factory.createShipping();
 
-    render() {
-        const button = this.factory.createButton();
-        const checkbox = this.factory.createCheckbox();
-        button.render();
-        checkbox.render();
-    }
+    console.log(product.getDetails());
+    console.log(`Shipping cost: $${shipping.calculateCost()}`);
 }
 
-const factory = new WindowsFactory();
-const app = new Application(factory);
-app.render();
+createOrder(new ElectronicsFactory());
+createOrder(new FurnitureFactory());

@@ -1,47 +1,62 @@
 interface Mediator {
-    send(message: string, colleague: Colleague): void;
+    notify(sender: Component, event: string): void;
 }
 
-abstract class Colleague {
-    constructor(protected mediator: Mediator) {}
+class CheckoutMediator implements Mediator {
+    constructor(
+        private cart: CartComponent,
+        private payment: PaymentComponent,
+        private inventory: InventoryComponent
+    ) {}
 
-    abstract receive(message: string): void;
-}
-
-class User extends Colleague {
-    receive(message: string): void {
-        console.log(`Usuário recebeu: ${message}`);
-    }
-
-    send(message: string): void {
-        this.mediator.send(message, this);
-    }
-}
-
-class ChatMediator implements Mediator {
-    private users: User[] = [];
-
-    addUser(user: User): void {
-        this.users.push(user);
-    }
-
-    send(message: string, colleague: Colleague): void {
-        this.users.forEach(user => {
-            if (user !== colleague) {
-                user.receive(message);
-            }
-        });
+    notify(sender: Component, event: string): void {
+        if (event === "checkout") {
+            console.log("Processing checkout...");
+            this.inventory.updateStock();
+            this.payment.processPayment();
+            this.cart.clearCart();
+        }
     }
 }
 
-const mediator = new ChatMediator();
+abstract class Component {
+    protected mediator?: Mediator;
 
-const user1 = new User(mediator);
-const user2 = new User(mediator);
-const user3 = new User(mediator);
+    setMediator(mediator: Mediator): void {
+        this.mediator = mediator;
+    }
+}
 
-mediator.addUser(user1);
-mediator.addUser(user2);
-mediator.addUser(user3);
+class CartComponent extends Component {
+    clearCart(): void {
+        console.log("Cart cleared.");
+        this.mediator?.notify(this, "cartCleared");
+    }
+}
 
-user1.send("Olá a todos!");
+class PaymentComponent extends Component {
+    processPayment(): void {
+        console.log("Payment processed.");
+        this.mediator?.notify(this, "paymentProcessed");
+    }
+}
+
+class InventoryComponent extends Component {
+    updateStock(): void {
+        console.log("Stock updated.");
+        this.mediator?.notify(this, "stockUpdated");
+    }
+}
+
+const cart = new CartComponent();
+const payment = new PaymentComponent();
+const inventory = new InventoryComponent();
+
+const mediator = new CheckoutMediator(cart, payment, inventory);
+
+cart.setMediator(mediator);
+payment.setMediator(mediator);
+inventory.setMediator(mediator);
+
+cart.clearCart();
+mediator.notify(cart, "checkout");

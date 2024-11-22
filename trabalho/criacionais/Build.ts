@@ -1,75 +1,63 @@
-class House {
-    private parts: string[] = [];
+class Order {
+    public items: string[] = [];
+    public shippingCost: number = 0;
+    public discount: number = 0;
 
-    addPart(part: string) {
-        this.parts.push(part);
-    }
-
-    show() {
-        console.log("Casa construída com: ", this.parts.join(", "));
+    getTotal(): number {
+        const basePrice = this.items.length * 10;
+        return basePrice + this.shippingCost - this.discount;
     }
 }
 
-interface HouseBuilder {
-    reset(): void;
-    buildWalls(): void;
-    buildRoof(): void;
-    buildDoors(): void;
-    getResult(): House;
+interface OrderBuilder {
+    addItem(item: string): OrderBuilder;
+    setShippingCost(cost: number): OrderBuilder;
+    applyDiscount(discount: number): OrderBuilder;
+    build(): Order;
 }
 
-class ConcreteHouseBuilder implements HouseBuilder {
-    private house: House;
+class OnlineOrderBuilder implements OrderBuilder {
+    private order: Order;
 
     constructor() {
-        this.reset();
+        this.order = new Order();
     }
 
-    reset() {
-        this.house = new House();
+    addItem(item: string): OrderBuilder {
+        this.order.items.push(item);
+        return this;
     }
 
-    buildWalls() {
-        this.house.addPart("Paredes");
+    setShippingCost(cost: number): OrderBuilder {
+        this.order.shippingCost = cost;
+        return this;
     }
 
-    buildRoof() {
-        this.house.addPart("Telhado");
+    applyDiscount(discount: number): OrderBuilder {
+        this.order.discount = discount;
+        return this;
     }
 
-    buildDoors() {
-        this.house.addPart("Portas");
-    }
-
-    getResult(): House {
-        const result = this.house;
-        this.reset();
-        return result;
+    build(): Order {
+        return this.order;
     }
 }
 
-class Director {
-    constructor(private builder: HouseBuilder) {}
-
-    constructSimpleHouse() {
-        this.builder.buildWalls();
-        this.builder.buildRoof();
-    }
-
-    constructFullHouse() {
-        this.builder.buildWalls();
-        this.builder.buildRoof();
-        this.builder.buildDoors();
+class OrderDirector {
+    static buildBasicOrder(builder: OrderBuilder): Order {
+        return builder.addItem("Item A").setShippingCost(5).build();
     }
 }
 
-const builder = new ConcreteHouseBuilder();
-const director = new Director(builder);
+const builder = new OnlineOrderBuilder();
+const basicOrder = OrderDirector.buildBasicOrder(builder);
+console.log(`Basic Order Total: $${basicOrder.getTotal()}`);
 
-console.log("Construindo casa simples:");
-director.constructSimpleHouse();
-builder.getResult().show();
+const customOrder = builder
+    .addItem("Item B")
+    .addItem("Item C")
+    .setShippingCost(10)
+    .applyDiscount(5)
+    .build();
 
-console.log("Construindo casa completa:");
-director.constructFullHouse();
-builder.getResult().show();
+console.log(`Custom Order Total: $${customOrder.getTotal()}`);

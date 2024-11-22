@@ -1,50 +1,49 @@
-abstract class Handler {
-    private nextHandler?: Handler;
+abstract class DiscountHandler {
+    protected nextHandler?: DiscountHandler;
 
-    setNext(handler: Handler): Handler {
+    setNext(handler: DiscountHandler): DiscountHandler {
         this.nextHandler = handler;
         return handler;
     }
 
-    handleRequest(request: string): void {
+    handleDiscount(amount: number): number {
         if (this.nextHandler) {
-            this.nextHandler.handleRequest(request);
+            return this.nextHandler.handleDiscount(amount);
         }
+        return amount;
     }
 }
 
-class AuthHandler extends Handler {
-    handleRequest(request: string): void {
-        if (request === "auth") {
-            console.log("Autenticação realizada.");
-        } else {
-            console.log("Autenticação não aplicável, passando adiante.");
-            super.handleRequest(request);
+class MembershipDiscount extends DiscountHandler {
+    handleDiscount(amount: number): number {
+        if (amount > 100) {
+            console.log("Membership discount applied: -10%");
+            amount *= 0.9;
         }
+        return super.handleDiscount(amount);
     }
 }
 
-class DataHandler extends Handler {
-    handleRequest(request: string): void {
-        if (request === "data") {
-            console.log("Dados processados.");
-        } else {
-            console.log("Dados não aplicáveis, passando adiante.");
-            super.handleRequest(request);
-        }
+class SeasonalDiscount extends DiscountHandler {
+    handleDiscount(amount: number): number {
+        console.log("Seasonal discount applied: -5%");
+        amount *= 0.95;
+        return super.handleDiscount(amount);
     }
 }
 
-const auth = new AuthHandler();
-const data = new DataHandler();
+class BlackFridayDiscount extends DiscountHandler {
+    handleDiscount(amount: number): number {
+        console.log("Black Friday discount applied: -20%");
+        amount *= 0.8;
+        return super.handleDiscount(amount);
+    }
+}
 
-auth.setNext(data);
+const baseAmount = 200;
 
-console.log("Teste 1:");
-auth.handleRequest("auth");
+const handler = new MembershipDiscount();
+handler.setNext(new SeasonalDiscount()).setNext(new BlackFridayDiscount());
 
-console.log("Teste 2:");
-auth.handleRequest("data");
-
-console.log("Teste 3:");
-auth.handleRequest("other");
+const finalAmount = handler.handleDiscount(baseAmount);
+console.log(`Final amount after discounts: $${finalAmount.toFixed(2)}`);

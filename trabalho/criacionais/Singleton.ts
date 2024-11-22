@@ -1,29 +1,32 @@
-class ConfigurationManager {
-    private static instance: ConfigurationManager;
-    private settings: Map<string, string> = new Map();
+// Singleton Class
+class Cart {
+    private static instance: Cart;
+    private items: string[] = [];
 
     private constructor() {}
 
-    static getInstance(): ConfigurationManager {
-        if (!this.instance) {
-            this.instance = new ConfigurationManager();
+    static getInstance(): Cart {
+        if (!Cart.instance) {
+            Cart.instance = new Cart();
         }
-        return this.instance;
+        return Cart.instance;
     }
 
-    setSetting(key: string, value: string) {
-        this.settings.set(key, value);
+    addItem(item: string): void {
+        this.items.push(item);
     }
 
-    getSetting(key: string): string | undefined {
-        return this.settings.get(key);
+    getItems(): string[] {
+        return this.items;
     }
 }
 
-const config1 = ConfigurationManager.getInstance();
-config1.setSetting("theme", "dark");
+const cart1 = Cart.getInstance();
+cart1.addItem("Product A");
 
-const config2 = ConfigurationManager.getInstance();
-console.log("Tema configurado:", config2.getSetting("theme"));
+const cart2 = Cart.getInstance();
+cart2.addItem("Product B");
 
-console.log(config1 === config2);
+console.log(cart1.getItems());
+console.log(cart2.getItems());
+console.log(cart1 === cart2);

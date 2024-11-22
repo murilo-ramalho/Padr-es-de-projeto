@@ -2,28 +2,38 @@ interface Expression {
     interpret(context: string): boolean;
 }
 
-class TerminalExpression implements Expression {
-    constructor(private data: string) {}
+class ContainsKeyword implements Expression {
+    constructor(private keyword: string) {}
 
     interpret(context: string): boolean {
-        return context.includes(this.data);
+        return context.includes(this.keyword);
     }
 }
 
-class AndExpression implements Expression {
+class IsCategory implements Expression {
+    constructor(private category: string) {}
+
+    interpret(context: string): boolean {
+        return context === this.category;
+    }
+}
+
+class OrExpression implements Expression {
     constructor(private expr1: Expression, private expr2: Expression) {}
 
     interpret(context: string): boolean {
-        return this.expr1.interpret(context) && this.expr2.interpret(context);
+        return this.expr1.interpret(context) || this.expr2.interpret(context);
     }
 }
 
-const isJava = new TerminalExpression("Java");
-const isPython = new TerminalExpression("Python");
-const isJavaAndPython = new AndExpression(isJava, isPython);
+const categoryFilter = new IsCategory("electronics");
+const keywordFilter = new ContainsKeyword("sale");
+const combinedFilter = new OrExpression(categoryFilter, keywordFilter);
 
-const context = "Java and Python are popular programming languages.";
+const searchQuery1 = "electronics";
+const searchQuery2 = "discount sale";
+const searchQuery3 = "furniture";
 
-console.log("Contains Java?", isJava.interpret(context)); // true
-console.log("Contains Python?", isPython.interpret(context)); // true
-console.log("Contains both Java and Python?", isJavaAndPython.interpret(context)); // true
+console.log(combinedFilter.interpret(searchQuery1));
+console.log(combinedFilter.interpret(searchQuery2));
+console.log(combinedFilter.interpret(searchQuery3));

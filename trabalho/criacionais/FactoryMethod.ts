@@ -1,46 +1,42 @@
-interface Transport {
-    deliver(): void;
+interface Payment {
+    processPayment(amount: number): void;
 }
 
-class Truck implements Transport {
-    deliver() {
-        console.log("Entrega feita por caminhão.");
+class CreditCardPayment implements Payment {
+    processPayment(amount: number): void {
+        console.log(`Processing credit card payment of $${amount}`);
     }
 }
 
-class Ship implements Transport {
-    deliver() {
-        console.log("Entrega feita por navio.");
+class PayPalPayment implements Payment {
+    processPayment(amount: number): void {
+        console.log(`Processing PayPal payment of $${amount}`);
     }
 }
 
-abstract class Logistics {
-    abstract createTransport(): Transport;
+abstract class PaymentProcessor {
+    abstract createPaymentMethod(): Payment;
 
-    planDelivery() {
-        const transport = this.createTransport();
-        transport.deliver();
+    process(amount: number): void {
+        const paymentMethod = this.createPaymentMethod();
+        paymentMethod.processPayment(amount);
     }
 }
 
-class RoadLogistics extends Logistics {
-    createTransport(): Transport {
-        return new Truck();
+class CreditCardProcessor extends PaymentProcessor {
+    createPaymentMethod(): Payment {
+        return new CreditCardPayment();
     }
 }
 
-class SeaLogistics extends Logistics {
-    createTransport(): Transport {
-        return new Ship();
+class PayPalProcessor extends PaymentProcessor {
+    createPaymentMethod(): Payment {
+        return new PayPalPayment();
     }
 }
 
-function clientCode(logistics: Logistics) {
-    logistics.planDelivery();
-}
+const creditCardProcessor = new CreditCardProcessor();
+creditCardProcessor.process(100);
 
-console.log("Logística rodoviária:");
-clientCode(new RoadLogistics());
-
-console.log("Logística marítima:");
-clientCode(new SeaLogistics());
+const paypalProcessor = new PayPalProcessor();
+paypalProcessor.process(50);

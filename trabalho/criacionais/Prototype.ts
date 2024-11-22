@@ -1,24 +1,22 @@
-interface Prototype {
-    clone(): Prototype;
+interface ProductPrototype {
+    clone(): ProductPrototype;
+    getDetails(): string;
 }
 
-class Document implements Prototype {
-    constructor(public title: string, public content: string) {}
+class Product implements ProductPrototype {
+    constructor(private name: string, private price: number) {}
 
-    clone(): Prototype {
-        return new Document(this.title, this.content);
+    clone(): ProductPrototype {
+        return new Product(this.name, this.price);
     }
 
-    display() {
-        console.log(`Título: ${this.title}, Conteúdo: ${this.content}`);
+    getDetails(): string {
+        return `Product: ${this.name}, Price: $${this.price}`;
     }
 }
 
-const originalDoc = new Document("Relatório", "Este é o conteúdo original.");
-console.log("Documento original:");
-originalDoc.display();
+const baseProduct = new Product("Basic T-Shirt", 20);
+const clonedProduct = baseProduct.clone();
 
-const clonedDoc = originalDoc.clone() as Document;
-clonedDoc.title = "Cópia do Relatório";
-console.log("Documento clonado:");
-clonedDoc.display();
+console.log(baseProduct.getDetails());
+console.log(clonedProduct.getDetails());

@@ -1,45 +1,45 @@
-interface Iterator<T> {
-    next(): T;
-    hasNext(): boolean;
-}
-
-interface Aggregate<T> {
+interface IterableCollection<T> {
     createIterator(): Iterator<T>;
 }
 
-class ListIterator<T> implements Iterator<T> {
-    private index: number = 0;
+class ProductCollection implements IterableCollection<string> {
+    private products: string[] = [];
 
-    constructor(private items: T[]) {}
-
-    next(): T {
-        return this.items[this.index++];
+    addProduct(product: string): void {
+        this.products.push(product);
     }
+
+    createIterator(): Iterator<string> {
+        return new ProductIterator(this.products);
+    }
+}
+
+interface Iterator<T> {
+    hasNext(): boolean;
+    next(): T;
+}
+
+class ProductIterator implements Iterator<string> {
+    private position: number = 0;
+
+    constructor(private products: string[]) {}
 
     hasNext(): boolean {
-        return this.index < this.items.length;
+        return this.position < this.products.length;
+    }
+
+    next(): string {
+        return this.products[this.position++];
     }
 }
 
-class ItemList<T> implements Aggregate<T> {
-    private items: T[] = [];
+const productCollection = new ProductCollection();
+productCollection.addProduct("Laptop");
+productCollection.addProduct("Smartphone");
+productCollection.addProduct("Tablet");
 
-    add(item: T): void {
-        this.items.push(item);
-    }
-
-    createIterator(): Iterator<T> {
-        return new ListIterator(this.items);
-    }
-}
-
-const list = new ItemList<string>();
-list.add("Item 1");
-list.add("Item 2");
-list.add("Item 3");
-
-const iterator = list.createIterator();
+const iterator = productCollection.createIterator();
 
 while (iterator.hasNext()) {
-    console.log(iterator.next());
+    console.log(`Product: ${iterator.next()}`);
 }

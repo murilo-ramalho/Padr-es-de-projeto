@@ -1,59 +1,77 @@
 interface Command {
     execute(): void;
+    undo(): void;
 }
 
-class Light {
-    turnOn() {
-        console.log("Luz ligada.");
+class Cart {
+    private items: string[] = [];
+
+    addItem(item: string): void {
+        this.items.push(item);
+        console.log(`Added ${item} to cart.`);
     }
 
-    turnOff() {
-        console.log("Luz desligada.");
+    removeItem(item: string): void {
+        const index = this.items.indexOf(item);
+        if (index !== -1) {
+            this.items.splice(index, 1);
+            console.log(`Removed ${item} from cart.`);
+        }
     }
-}
 
-class TurnOnCommand implements Command {
-    constructor(private light: Light) {}
-
-    execute() {
-        this.light.turnOn();
-    }
-}
-
-class TurnOffCommand implements Command {
-    constructor(private light: Light) {}
-
-    execute() {
-        this.light.turnOff();
+    showCart(): void {
+        console.log(`Cart items: ${this.items.join(", ")}`);
     }
 }
 
-class RemoteControl {
-    private command?: Command;
+class AddItemCommand implements Command {
+    constructor(private cart: Cart, private item: string) {}
 
-    setCommand(command: Command) {
-        this.command = command;
+    execute(): void {
+        this.cart.addItem(this.item);
     }
 
-    pressButton() {
-        if (this.command) {
-            this.command.execute();
-        } else {
-            console.log("Nenhum comando configurado.");
+    undo(): void {
+        this.cart.removeItem(this.item);
+    }
+}
+
+class RemoveItemCommand implements Command {
+    constructor(private cart: Cart, private item: string) {}
+
+    execute(): void {
+        this.cart.removeItem(this.item);
+    }
+
+    undo(): void {
+        this.cart.addItem(this.item);
+    }
+}
+
+class CommandInvoker {
+    private history: Command[] = [];
+
+    execute(command: Command): void {
+        command.execute();
+        this.history.push(command);
+    }
+
+    undo(): void {
+        const command = this.history.pop();
+        if (command) {
+            command.undo();
         }
     }
 }
 
-const light = new Light();
-const turnOn = new TurnOnCommand(light);
-const turnOff = new TurnOffCommand(light);
+const cart = new Cart();
+const invoker = new CommandInvoker();
 
-const remote = new RemoteControl();
+const addItemCommand = new AddItemCommand(cart, "Laptop");
+const removeItemCommand = new RemoveItemCommand(cart, "Laptop");
 
-console.log("Ligando a luz:");
-remote.setCommand(turnOn);
-remote.pressButton();
+invoker.execute(addItemCommand);
+cart.showCart();
 
-console.log("Desligando a luz:");
-remote.setCommand(turnOff);
-remote.pressButton();
+invoker.undo();
+cart.showCart();
