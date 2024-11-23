@@ -1,55 +1,65 @@
-class Memento {
-    constructor(private state: string) {}
+class CartMemento {
+    constructor(private items: string[]) {}
 
-    getState(): string {
-        return this.state;
+    getItems(): string[] {
+        return [...this.items];
     }
 }
 
-class Document {
-    private state: string = "";
+class Cart {
+    private items: string[] = [];
 
-    setState(state: string): void {
-        this.state = state;
+    addItem(item: string): void {
+        this.items.push(item);
+        console.log(`Added: ${item}`);
     }
 
-    getState(): string {
-        return this.state;
+    removeItem(item: string): void {
+        const index = this.items.indexOf(item);
+        if (index !== -1) {
+            this.items.splice(index, 1);
+            console.log(`Removed: ${item}`);
+        }
     }
 
-    save(): Memento {
-        return new Memento(this.state);
+    save(): CartMemento {
+        return new CartMemento(this.items);
     }
 
-    restore(memento: Memento): void {
-        this.state = memento.getState();
-    }
-}
-
-class History {
-    private mementos: Memento[] = [];
-
-    addMemento(memento: Memento): void {
-        this.mementos.push(memento);
+    restore(memento: CartMemento): void {
+        this.items = memento.getItems();
+        console.log("Cart restored.");
     }
 
-    getMemento(): Memento | undefined {
-        return this.mementos.pop();
+    showItems(): void {
+        console.log(`Current Cart: ${this.items.join(", ")}`);
     }
 }
 
-const document = new Document();
-const history = new History();
+class CartHistory {
+    private history: CartMemento[] = [];
 
-document.setState("Version 1");
-history.addMemento(document.save());
+    addSnapshot(memento: CartMemento): void {
+        this.history.push(memento);
+    }
 
-document.setState("Version 2");
-history.addMemento(document.save());
+    getSnapshot(index: number): CartMemento | undefined {
+        return this.history[index];
+    }
+}
 
-document.setState("Version 3");
-console.log("Current state:", document.getState());
+const cart = new Cart();
+const history = new CartHistory();
 
-const lastMemento = history.getMemento();
-document.restore(lastMemento!);
-console.log("Restored to:", document.getState());
+cart.addItem("Laptop");
+cart.addItem("Smartphone");
+history.addSnapshot(cart.save());
+
+cart.addItem("Tablet");
+cart.removeItem("Smartphone");
+history.addSnapshot(cart.save());
+
+cart.showItems();
+
+cart.restore(history.getSnapshot(0)!);
+cart.showItems();

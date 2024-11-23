@@ -1,37 +1,44 @@
-interface Strategy {
-    execute(a: number, b: number): number;
+interface PaymentStrategy {
+    pay(amount: number): void;
 }
 
-class AddStrategy implements Strategy {
-    execute(a: number, b: number): number {
-        return a + b;
-    }
-}
-
-class MultiplyStrategy implements Strategy {
-    execute(a: number, b: number): number {
-        return a * b;
+class CreditCardPayment implements PaymentStrategy {
+    pay(amount: number): void {
+        console.log(`Paid $${amount} using Credit Card.`);
     }
 }
 
-class Calculator {
-    private strategy: Strategy;
-
-    constructor(strategy: Strategy) {
-        this.strategy = strategy;
-    }
-
-    setStrategy(strategy: Strategy): void {
-        this.strategy = strategy;
-    }
-
-    executeStrategy(a: number, b: number): number {
-        return this.strategy.execute(a, b);
+class PayPalPayment implements PaymentStrategy {
+    pay(amount: number): void {
+        console.log(`Paid $${amount} using PayPal.`);
     }
 }
 
-const calculator = new Calculator(new AddStrategy());
-console.log(calculator.executeStrategy(5, 3));
+class BankTransferPayment implements PaymentStrategy {
+    pay(amount: number): void {
+        console.log(`Paid $${amount} using Bank Transfer.`);
+    }
+}
 
-calculator.setStrategy(new MultiplyStrategy());
-console.log(calculator.executeStrategy(5, 3));
+class Checkout {
+    private paymentStrategy: PaymentStrategy;
+
+    setPaymentStrategy(strategy: PaymentStrategy): void {
+        this.paymentStrategy = strategy;
+    }
+
+    processPayment(amount: number): void {
+        if (!this.paymentStrategy) {
+            throw new Error("No payment strategy selected.");
+        }
+        this.paymentStrategy.pay(amount);
+    }
+}
+
+const checkout = new Checkout();
+
+checkout.setPaymentStrategy(new CreditCardPayment());
+checkout.processPayment(100);
+
+checkout.setPaymentStrategy(new PayPalPayment());
+checkout.processPayment(200);

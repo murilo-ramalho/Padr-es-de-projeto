@@ -1,35 +1,54 @@
 interface Visitor {
-    visit(element: ConcreteElementA): void;
-    visit(element: ConcreteElementB): void;
+    visitProduct(product: Product): void;
+    visitDiscount(discount: Discount): void;
 }
 
-class ConcreteVisitor implements Visitor {
-    visit(element: ConcreteElementA): void {
-        console.log("Visitei o Elemento A");
-    }
-
-    visit(element: ConcreteElementB): void {
-        console.log("Visitei o Elemento B");
-    }
-}
-
-interface Element {
+interface Visitable {
     accept(visitor: Visitor): void;
 }
 
-class ConcreteElementA implements Element {
+class Product implements Visitable {
+    constructor(public name: string, public price: number) {}
+
     accept(visitor: Visitor): void {
-        visitor.visit(this);
+        visitor.visitProduct(this);
     }
 }
 
-class ConcreteElementB implements Element {
+class Discount implements Visitable {
+    constructor(public code: string, public percentage: number) {}
+
     accept(visitor: Visitor): void {
-        visitor.visit(this);
+        visitor.visitDiscount(this);
     }
 }
 
-const elements: Element[] = [new ConcreteElementA(), new ConcreteElementB()];
-const visitor = new ConcreteVisitor();
+class CartSummaryVisitor implements Visitor {
+    private total = 0;
 
-elements.forEach(element => element.accept(visitor));
+    visitProduct(product: Product): void {
+        console.log(`Product: ${product.name}, Price: $${product.price}`);
+        this.total += product.price;
+    }
+
+    visitDiscount(discount: Discount): void {
+        console.log(`Applying Discount: ${discount.percentage}% off with code ${discount.code}`);
+        this.total *= (1 - discount.percentage / 100);
+    }
+
+    getTotal(): number {
+        return this.total;
+    }
+}
+
+const items: Visitable[] = [
+    new Product("Laptop", 1000),
+    new Product("Mouse", 50),
+    new Discount("SALE20", 20),
+];
+
+const visitor = new CartSummaryVisitor();
+
+items.forEach(item => item.accept(visitor));
+
+console.log(`Total Price: $${visitor.getTotal().toFixed(2)}`);
